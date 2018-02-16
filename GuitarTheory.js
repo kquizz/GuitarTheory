@@ -6,7 +6,14 @@ var notes_sharp = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#" , "G", "
 var notes_flat = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab"];
 
 
-var scales = [["Major Scale", [1, 3, 5, 6, 8, 10, 12]]];
+var scales = [["Major(Ionian)", [1, 3, 5, 6, 8, 10, 12]],
+["Dorian", [1,3,4,6,8,10,11]],
+["Phyrigian", [1,2,4,6,8,9,11]],
+["Lydian", [1,3,5,7,8,10,12]],
+["Mixolydian", [1,3,5,6,8,10,11]],
+["Minor (Aeolian)", [1,3,4,6,8,9,11]],
+["Locrian", [1,2,4,6,7,9,11]]]
+;
 
 var numberOfNotes = 12;
 var numberOfLinesInStaff = 5;
