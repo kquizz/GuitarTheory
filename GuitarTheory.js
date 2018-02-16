@@ -1,79 +1,175 @@
 var sel;
+var canvas;
+var notes;
+
 var notes_sharp = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#" , "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#" , "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#" , "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#" , "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#" , "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#" , "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
 var notes_flat = ["A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb" , "G", "Ab"];
 
 
 var scales = [["Major Scale", [1, 3, 5, 6, 8, 10, 12]]];
 
-var strings = [7, 12, 17, 22, 26, 31]; 
 var numberOfNotes = 12;
-
-var canvas;
-var notes;
-
-var fretboard = {
-	offset 			: 25,
-	length 			: 40,
-	height 			: 20,
-	numberOfFrets 	: 17,
-	numberOfStrings : strings.length,
-	diamondOfset	: 10,
-	diamondLength	: 5,
-	diamondPosition : [[3, 1],[5,1], [7, 1], [9, 1], [12, 2], [15,1]],
-	stringXNoteOffset : 20,
-	stringYNoteOffset : 5,
-	doublelineOffset : 3,
-	doubleLineFretNo : 12
-	
-};
+var numberOfLinesInStaff = 5;
 
 
+
+
+var currentMode = "Scales"; 
+var createkeyword = "setup";
+var destroykeyword = "remove";
+
+
+var menuItems = [["Scales", ["NoteSelect", "ScaleSelect", "ShowScaleButton"]],
+				 ["Notes", ["showAllNotesButton"]],
+				 ["Chords", []]];
+				
+
+				
+
+
+var settings = {
+	FretBoardYOffset  : 50,
+	FretBoardXOffset  : 25,
+	MusicStaffYOffset : 15,
+	MusicStaffXOffset : 15,
+	FretLength		  : 40,
+	FretHeight 		  : 20,
+	StaffLength		  : 20,
+	StaffHeight	  	  : 20,
+	NumberOfFrets 	  : 17,
+	Strings			  : [7, 12, 17, 22, 26, 31],
+	NumberOfStrings   : 6,
+	DiamondYOffset	  : 10,
+	DiamondLength	  : 5,
+	DiamondPosition   : [[3, 1],[5,1], [7, 1], [9, 1], [12, 2], [15,1]],
+	TuningNoteYOffset : 5,
+	TuningNoteXOffset : 20,
+	OctiveLineXOffset : 3,
+	OctiveLineFretNo  : 12,
+	MenuSelectX		  : 0,
+	MenuSelectY		  : 0,
+	ToggleButtonX	  : 400,
+	ToggleButtonY	  : 0,
+	ClearButtonX	  : 480,
+	ClearButtonY	  : 0, 
+	SecondRowY	      : 30, 
+	NoteSelectX	  	  : 0,
+	ScaleSelectX	  : 60,
+	ShowScaleButtonx  : 160,
+	ShowAllNotesButtonx: 0};
+
+var	FretboardHeight	 = settings.FretBoardYOffset + settings.NumberOfStrings * settings.FretHeight + settings.DiamondYOffset + 2 * Math.sqrt(2) * settings.DiamondLength;
+var	FretboardWidth	 = settings.FretBoardXOffset + (settings.NumberOfFrets -1) * settings.FretLength;
+
+var MusicStaffY =  FretboardHeight + settings.MusicStaffYOffset;
+var	MusicStaffHeight  = settings.MusicStaffYOffset + numberOfLinesInStaff * settings.StaffHeight + settings.StaffHeight * 10;
+var	MusicStaffWidth	 = FretboardWidth;
 
 
 function setup() {
-	createCanvas(2000, fretboard.offset + fretboard.numberOfStrings * fretboard.height + fretboard.diamondOfset + 2 * sqrt(2) * fretboard.diamondLength);
+	createCanvas(FretboardWidth + MusicStaffWidth, FretboardHeight + MusicStaffHeight);
+	
  	noLoop();
 
 	notes = notes_sharp;
 	
+	setupMenuSelect();
+	setupToggleAccidentalButton();
 	setupNoteSelect();
 	setupScaleSelect();
-	setupShowScaleButton();
-	setupshowAllNotessButton();
-	setupToggleAccidentalButton();
+	setupShowScaleButton();	
 	setupClearButton();
   }
   
+  
+  function setupMenuSelect(){
+	menuSelect = createSelect();
+	menuSelect.position(settings.MenuSelectX, settings.MenuSelectY);
+	
+	menuSelect.option("Scales");	
+	menuSelect.option("Notes");
+	menuSelect.option("Chords");
+	menuSelect.changed(MenuOnChangeEvent);
+}
+    
+  function MenuOnChangeEvent(){
+	  var menuValue = menuSelect.value();
+	  redraw();
+
+	  var menuArray = menuItems.find(x => x[0] == currentMode);
+		  
+	  menuArray[1].forEach( function(itemsToRemove){
+		  var tmpFunc = new Function(destroykeyword + itemsToRemove+ '()');
+		  tmpFunc();
+	  });
+	  	  
+	  currentMode = menuValue;
+		  
+	  var menuArray = menuItems.find(x => x[0] == currentMode);
+	  
+	  menuArray[1].forEach( function(itemsToAdd){
+		  var tmpFunc = new Function(createkeyword + itemsToAdd+ '()');
+		  tmpFunc();
+	  });
+	}
+  
+  
 function setupNoteSelect(){
 	noteSelect = createSelect();
-
+	noteSelect.position(settings.NoteSelectX, settings.SecondRowY);
+	
 	for (i=0; i < numberOfNotes;i++){
 		noteSelect.option(notes[i]);
 	}	
 }
 
+function removeNoteSelect(){
+	noteSelect.remove();
+}
+
 function setupScaleSelect(){
 	scaleSelect = createSelect();
-	scales.forEach(function(item){scaleSelect.option(item[0])});
+	scaleSelect.position(settings.ScaleSelectX, settings.SecondRowY);
+	noteSelect.position(settings.NoteSelectX, settings.SecondRowY);
+	scales.forEach(item => scaleSelect.option(item[0]));
 }  
 
+function removeScaleSelect(){
+	scaleSelect.remove();
+}  
+
+
 function setupShowScaleButton(){
-	showAllNotess = createButton("Show Scale");
-	showAllNotess.mousePressed(showScale);
+	showScaleButton = createButton("Show Scale");
+	showScaleButton.position(settings.ShowScaleButtonx, settings.SecondRowY);
+	showScaleButton.mousePressed(showScale);
 }
 
-function setupshowAllNotessButton(){
-	showAllNotess = createButton("Show All Notes");
-	showAllNotess.mousePressed(showAllNotes);
+function removeShowScaleButton(){
+	showScaleButton.remove();
 }
+
+
+function setupshowAllNotesButton(){
+	showAllNotesButton = createButton("Show All Notes");
+	showAllNotesButton.position(settings.ShowAllNotesButtonx, settings.SecondRowY);
+	showAllNotesButton.mousePressed(showAllNotes);
+}
+
+function removeshowAllNotesButton(){
+	showAllNotesButton.remove();
+}
+
 
 function setupToggleAccidentalButton(){
 	toggleButton = createButton('Toggle #/b');
+	toggleButton.position(settings.ToggleButtonX, settings.ToggleButtonY);
 	toggleButton.mousePressed(toggleAccidentals);
 }
 
 function setupClearButton(){
 	clearButton = createButton("Clear");
+	clearButton.position(settings.ClearButtonX, settings.ClearButtonY);
 	clearButton.mousePressed(clearAll);
 }
 
@@ -188,9 +284,9 @@ function getColorByNumber(number){
 
  
  function displayNote(note, color){
-	for (i=0; i < fretboard.numberOfStrings;i++){
-		for (j=0; j < fretboard.numberOfFrets; j++){
-			if (notes[strings[i] + j] == note){
+	for (i=0; i < settings.NumberOfStrings;i++){
+		for (j=0; j < settings.NumberOfFrets; j++){
+			if (notes[settings.Strings[i] + j] == note){
 				noteOffset = 3;
 				noteDiameter = 17;
 				
@@ -203,10 +299,10 @@ function getColorByNumber(number){
 				
 				
 				fill(color);
-				ellipse(fretboard.offset + j * fretboard.length, fretboard.offset + i * fretboard.height, noteDiameter);
+				ellipse(settings.FretBoardXOffset + j * settings.FretLength, settings.FretBoardYOffset + i * settings.FretHeight, noteDiameter);
 					
 				fill("white");
-				text(note, fretboard.offset + j * fretboard.length - noteOffset, fretboard.offset + i * fretboard.height + 4);
+				text(note, settings.FretBoardXOffset + j * settings.FretLength - noteOffset, settings.FretBoardYOffset + i * settings.FretHeight + 4);
 			}
 		}
 	}	
@@ -214,42 +310,69 @@ function getColorByNumber(number){
  
  
 function draw(){
-   drawFretBoard();
+   drawFretboard();
    drawStringTunings();
+   drawMusicStaff();
    }
 
 function drawStringTunings(){
 	
-	for(i=0;i<fretboard.numberOfStrings;i++){
-		text(notes[strings[i]], fretboard.offset -  fretboard.stringXNoteOffset, fretboard.offset + (fretboard.numberOfStrings - 1 - i) * fretboard.height + fretboard.stringYNoteOffset);
+	for(i=0;i<settings.NumberOfStrings;i++){
+		text(notes[settings.Strings[i]], settings.FretBoardXOffset -  settings.TuningNoteXOffset, settings.FretBoardYOffset + (settings.NumberOfStrings - 1 - i) * settings.FretHeight + settings.TuningNoteYOffset);
 	}
 }
 	
-   
-function drawFretBoard() {
-	for(i = 0; i < fretboard.numberOfStrings; i++)
-	{
-		line(fretboard.offset, fretboard.offset + i * fretboard.height, fretboard.offset + fretboard.length * (fretboard.numberOfFrets -1), fretboard.offset + i * fretboard.height);
-	}
 	
-	strokeWeight(5);
-	line(fretboard.offset, fretboard.offset,  fretboard.offset, fretboard.offset + (fretboard.numberOfStrings - 1)  * fretboard.height)
-	
-	for (i = 0; i < fretboard.numberOfFrets; i++){
-		strokeWeight(1);
-		line(fretboard.offset + i * fretboard.length, fretboard.offset,  fretboard.offset + i * fretboard.length, fretboard.offset + (fretboard.numberOfStrings - 1) * fretboard.height)
-	}
-	
-	line(fretboard.offset - fretboard.doublelineOffset + fretboard.doubleLineFretNo* fretboard.length, fretboard.offset,  fretboard.offset - fretboard.doublelineOffset + fretboard.doubleLineFretNo* fretboard.length, fretboard.offset + (fretboard.numberOfStrings - 1) * fretboard.height)
+	function drawMusicStaff(){
+		for(drawStaffCount=0;drawStaffCount<numberOfLinesInStaff; drawStaffCount++){
+			//Draw the Lines
+			line(settings.MusicStaffXOffset, 
+			MusicStaffY + settings.MusicStaffYOffset + drawStaffCount * settings.StaffHeight, 
+			MusicStaffWidth, 
+			MusicStaffY + settings.MusicStaffYOffset + drawStaffCount * settings.StaffHeight);
+		}
 
-	for (i = 0; i < fretboard.numberOfFrets + 1; i++){
-		for (j=0; j < fretboard.diamondPosition.length;j++){
-			diamondPosition = fretboard.diamondPosition[j];
+	line(settings.MusicStaffXOffset, MusicStaffY + settings.MusicStaffYOffset,  
+		settings.MusicStaffXOffset, MusicStaffY + settings.MusicStaffYOffset + (numberOfLinesInStaff - 1)  * settings.StaffHeight);
+	line(MusicStaffWidth, MusicStaffY + settings.MusicStaffYOffset,  
+		MusicStaffWidth, MusicStaffY + settings.MusicStaffYOffset + (numberOfLinesInStaff - 1)  * settings.StaffHeight);
+
+
+		}
+	
+	
+	
+	
+   
+function drawFretboard() {
+	
+	//Draw the Strings
+	for(i = 0; i < settings.NumberOfStrings; i++)
+	{
+		line(settings.FretBoardXOffset, settings.FretBoardYOffset + i * settings.FretHeight, settings.FretBoardXOffset + settings.FretLength * (settings.NumberOfFrets -1), settings.FretBoardYOffset + i * settings.FretHeight);
+	}
+	
+	//Draw the FretPost (is that what it's called?)
+	strokeWeight(5);
+	line(settings.FretBoardXOffset, settings.FretBoardYOffset,  settings.FretBoardXOffset, settings.FretBoardYOffset + (settings.NumberOfStrings - 1)  * settings.FretHeight)
+	
+	//Draw the Frets
+	for (i = 0; i < settings.NumberOfFrets; i++){
+		strokeWeight(1);
+		line(settings.FretBoardXOffset + i * settings.FretLength, settings.FretBoardYOffset,  settings.FretBoardXOffset + i * settings.FretLength, settings.FretBoardYOffset + (settings.NumberOfStrings - 1) * settings.FretHeight)
+	}
+	
+	//Draw the Octive Double Line
+	line(settings.FretBoardXOffset + settings.OctiveLineFretNo* settings.FretLength - settings.OctiveLineXOffset, settings.FretBoardYOffset, settings.FretBoardXOffset + settings.OctiveLineFretNo* settings.FretLength - settings.OctiveLineXOffset, settings.FretBoardYOffset + (settings.NumberOfStrings - 1) * settings.FretHeight)
+	
+	for (i = 0; i < settings.NumberOfFrets + 1; i++){
+		for (j=0; j < settings.DiamondPosition.length;j++){
+			diamondPosition = settings.DiamondPosition[j];
 
 			if (i == diamondPosition[0] - 1){
-				diamondX = fretboard.offset + (fretboard.length/2) + fretboard.length * i;
-				diamondY = fretboard.offset + (fretboard.numberOfStrings - 1) * fretboard.height + fretboard.diamondOfset;
-				diamondLength = fretboard.diamondLength;
+				diamondX = settings.FretBoardXOffset + (settings.FretLength/2) + settings.FretLength * i;
+				diamondY = settings.FretBoardYOffset + (settings.NumberOfStrings - 1) * settings.FretHeight + settings.DiamondYOffset;
+				diamondLength = settings.DiamondLength;
 			
 				fill(0);
 				quad(diamondX, 				  diamondY, 
